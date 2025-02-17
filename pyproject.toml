@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mcrmasters-be"
+version = "0.1.0"
+description = ""
+authors = ["Taeho <taehogwon96@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.8"
+uvicorn = "^0.34.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+mypy = "^1.15.0"
+ruff = "^0.9.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
