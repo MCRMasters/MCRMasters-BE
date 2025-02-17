@@ -16,6 +16,7 @@ pytest = "^8.3.4"
 mypy = "^1.15.0"
 ruff = "^0.9.6"
 pre-commit = "^4.1.0"
+httpx = "^0.28.1"
 
 [tool.mypy]
 python_version = "3.12"
@@ -25,6 +26,11 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 ignore_missing_imports = true
 exclude = ["tests/", "build/", "dist/"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disable_error_code = ["misc"]
 
 [tool.ruff]
 line-length = 88
