@@ -13,7 +13,7 @@ git clone https://github.com/MCRMasters/MCRMasters-BE.git
 sudo apt-get update
 sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
-libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl
+libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl
 ```
 
 ### pyenv 설치스크립트 실행
@@ -21,7 +21,9 @@ libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl
 curl https://pyenv.run | bash
 ```
 
-### shell 설정 파일에 환경변수 추가 (~/.zshrc나 ~/.bashrc)
+### shell 설정 파일에 환경변수 추가
+~/.bashrc나 ~/.zshrc에 다음 내용 끝에 추가
+
 ```
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
@@ -54,6 +56,7 @@ curl -sSL https://install.python-poetry.org | python3 -
 
 ### shell 설정 파일에 환경변수 추가 (~/.zshrc나 ~/.bashrc)
 
+~/.bashrc나 ~/.zshrc에 다음 내용 끝에 추가
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
@@ -65,7 +68,7 @@ source ~/.bashrc  # bash 사용시
 source ~/.zshrc   # zsh 사용시
 ```
 
-### poetry 설치 확인
+### poetry 설치 확인 (2.0.0 이상 확인)
 ```bash
 poetry --version
 ```
@@ -77,7 +80,7 @@ poetry install
 
 ## pre-commit
 ```bash
-pre-commit install
+poetry run pre-commit install
 ```
 
 ## test
