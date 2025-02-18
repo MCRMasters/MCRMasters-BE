@@ -6,7 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.config import settings
 
 engine = create_async_engine(
-    settings.sqlalchemy_database_uri.replace("postgresql://", "postgresql+asyncpg://"),
+    settings.sqlalchemy_database_uri,
     echo=True,
     pool_pre_ping=True,
 )
