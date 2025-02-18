@@ -1,22 +1,23 @@
-"""Initial migration
+"""add user model
 
-Revision ID: e59259ad00ac
-Revises:
-Create Date: 2025-02-18 21:46:05.047331
+Revision ID: 0021b3e962de
+Revises: e26e5bd7685a
+Create Date: 2025-02-19 05:02:01.864339
 
 """
 
-from collections.abc import Sequence
+from typing import Sequence, Union
 
+from alembic import op
 import sqlalchemy as sa
 import sqlmodel
-from alembic import op
+
 
 # revision identifiers, used by Alembic.
-revision: str = "e59259ad00ac"
-down_revision: str | None = None
-branch_labels: str | Sequence[str] | None = None
-depends_on: str | Sequence[str] | None = None
+revision: str = "0021b3e962de"
+down_revision: Union[str, None] = "e26e5bd7685a"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
@@ -24,7 +25,7 @@ def upgrade() -> None:
     op.create_table(
         "user",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("username", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("password_hash", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
