@@ -10,7 +10,14 @@ package-mode = false
 python = "^3.12"
 fastapi = "^0.115.8"
 uvicorn = "^0.34.0"
-
+sqlmodel = "^0.0.22"
+pydantic-settings = "^2.7.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.9"
+alembic = "^1.13.1"
+asyncpg = "^0.30.0"
+python-dotenv = "^1.0.1"
+pytest-dotenv = "^0.5.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
@@ -19,6 +26,7 @@ ruff = "^0.9.6"
 pre-commit = "^4.1.0"
 httpx = "^0.28.1"
 pytest-asyncio = "^0.25.3"
+psycopg2-binary = "^2.9.10"
 
 [tool.mypy]
 python_version = "3.12"
@@ -27,12 +35,10 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 ignore_missing_imports = true
-exclude = ["tests/", "build/", "dist/"]
 
 [[tool.mypy.overrides]]
 module = "tests.*"
-disallow_untyped_defs = false
-disable_error_code = ["misc"]
+ignore_errors = true
 
 [tool.ruff]
 line-length = 88
@@ -68,7 +74,13 @@ select = [
 max-complexity = 10
 
 [tool.pytest.ini_options]
+env_files = [".env", ".env.test"]
 asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_default_fixture_loop_scope = "function"
 
 [build-system]
 requires = ["poetry-core"]
