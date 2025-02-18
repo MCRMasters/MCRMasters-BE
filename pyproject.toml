@@ -10,7 +10,11 @@ package-mode = false
 python = "^3.12"
 fastapi = "^0.115.8"
 uvicorn = "^0.34.0"
-
+sqlmodel = "^0.0.22"
+pydantic-settings = "^2.7.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.9"
+alembic = "^1.13.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
@@ -19,6 +23,7 @@ ruff = "^0.9.6"
 pre-commit = "^4.1.0"
 httpx = "^0.28.1"
 pytest-asyncio = "^0.25.3"
+psycopg2-binary = "^2.9.10"
 
 [tool.mypy]
 python_version = "3.12"
