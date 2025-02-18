@@ -1,6 +1,10 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.endpoints import api_router
+from app.core.config import settings
+from app.schemas.base_response import BaseResponse
+
 app = FastAPI(
     title="MCRMasters-BE",
     description="A FastAPI backend application for MCRMasters",
@@ -16,7 +20,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
 
 @app.get("/health", status_code=status.HTTP_200_OK)
-async def health_check() -> dict[str, str]:
-    return {"status": "healthy"}
+async def health_check() -> BaseResponse:
+    return BaseResponse(message="healthy")

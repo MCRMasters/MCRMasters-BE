@@ -2,9 +2,10 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from sqlmodel import SQLModel
 
 from app.core.config import settings
+
+# Import your SQLModel models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -15,35 +16,16 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-section = config.config_ini_section
-config.set_section_option(section, "POSTGRES_USER", settings.POSTGRES_USER)
-config.set_section_option(section, "POSTGRES_PASSWORD", settings.POSTGRES_PASSWORD)
-config.set_section_option(section, "POSTGRES_SERVER", settings.POSTGRES_SERVER)
-config.set_section_option(section, "POSTGRES_PORT", settings.POSTGRES_PORT)
-config.set_section_option(section, "POSTGRES_DB", settings.POSTGRES_DB)
-
 # add your model's MetaData object here
-target_metadata = SQLModel.metadata
+# for 'autogenerate' support
+from sqlmodel import SQLModel
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+target_metadata = SQLModel.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
-    url = config.get_main_option("sqlalchemy.url")
+    """Run migrations in 'offline' mode."""
+    url = settings.sync_database_uri
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -56,14 +38,15 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    """Run migrations in 'online' mode."""
+    # 비동기 URI에서 동기 URI로 변경
+    sync_uri = settings.sync_database_uri
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = sync_uri
 
-    """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

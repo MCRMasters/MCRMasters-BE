@@ -1,4 +1,3 @@
-# app/core/config.py
 from enum import Enum
 from functools import lru_cache
 
@@ -22,6 +21,10 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = "admin"
     POSTGRES_PORT: str = "5432"
     POSTGRES_DB: str = "mcr_masters"
+
+    @property
+    def sync_database_uri(self) -> str:
+        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     @property
     def database_uri(self) -> str:
