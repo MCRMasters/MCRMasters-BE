@@ -1,7 +1,7 @@
 from app.core.error import DomainErrorCode, MCRDomainError
 
 MIN_USERNAME_LENGTH = 3
-MAX_USERNAME_LENGTH = 10
+MAX_USERNAME_LENGTH = 20
 
 
 def validate_username(username: str) -> str:
