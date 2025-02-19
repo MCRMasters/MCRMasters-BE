@@ -46,4 +46,8 @@ def get_settings() -> Settings:
     return Settings()
 
 
+def get_test_settings() -> Settings:
+    return Settings()
+
+
 settings = get_settings()
