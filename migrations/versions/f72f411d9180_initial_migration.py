@@ -1,8 +1,8 @@
-"""add user model
+"""initial migration
 
-Revision ID: 0021b3e962de
-Revises: e26e5bd7685a
-Create Date: 2025-02-19 05:02:01.864339
+Revision ID: f72f411d9180
+Revises:
+Create Date: 2025-02-19 09:41:06.807022
 
 """
 
@@ -14,8 +14,8 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = "0021b3e962de"
-down_revision: Union[str, None] = "e26e5bd7685a"
+revision: str = "f72f411d9180"
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("username", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("password_hash", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
-        sa.Column("last_login", sa.DateTime(), nullable=True),
+        sa.Column("last_login", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("username"),
     )
