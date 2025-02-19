@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 
-from app.core.config import settings
+from app.core.config import get_test_settings
 from app.db.session import get_session
 from app.main import app
 
@@ -29,8 +29,9 @@ def event_loop_policy():
 @pytest_asyncio.fixture(scope="session")
 async def test_engine():
     """테스트 DB 엔진 설정"""
+    test_settings = get_test_settings()
     engine = create_async_engine(
-        settings.database_uri,
+        test_settings.database_uri,
         echo=True,
         future=True,
         poolclass=NullPool,
