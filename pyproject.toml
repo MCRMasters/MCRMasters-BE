@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "mcrmasters-be"
+name = "mcr-masters-core"
 version = "0.1.0"
 description = ""
-authors = ["Taeho <taehogwon96@gmail.com>"]
+authors = ["Taeho Gwon <taehogwon96@gmail.com>"]
 readme = "README.md"
 package-mode = false
 
