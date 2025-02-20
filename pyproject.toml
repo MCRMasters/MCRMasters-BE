@@ -6,9 +6,6 @@ authors = ["Taeho Gwon <taehogwon96@gmail.com>"]
 readme = "README.md"
 package-mode = false
 
-[virtualenvs]
-in-project = true
-
 [tool.poetry.dependencies]
 python = "^3.12"
 uvicorn = "^0.34.0"
