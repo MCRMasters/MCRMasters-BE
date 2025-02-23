@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
 from app.main import app
+from app.schemas.google_oauth import GoogleTokenResponse, GoogleUserInfo
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -49,15 +50,19 @@ async def client(mock_session: AsyncSession) -> AsyncGenerator[AsyncClient, None
 @pytest.fixture
 def mock_google_responses():
     return {
-        "token_response": {
-            "access_token": "mock_access_token",
-            "refresh_token": "mock_refresh_token",
-            "id_token": "mock_id_token",
-            "expires_in": 3600,
-        },
-        "userinfo_response": {
-            "email": "test@example.com",
-            "name": "Test User",
-            "picture": "https://example.com/picture.jpg",
-        },
+        "token_response": GoogleTokenResponse(
+            access_token="mock_access_token",
+            refresh_token="mock_refresh_token",
+            id_token="mock_id_token",
+            expires_in=3600,
+            token_type="Bearer",
+            scope="openid email profile",
+        ).model_dump(),
+        "userinfo_response": GoogleUserInfo(
+            email="test@example.com",
+            name="Test User",
+            picture="https://example.com/picture.jpg",
+            verified_email=True,
+            locale="en",
+        ).model_dump(),
     }
