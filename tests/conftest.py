@@ -51,11 +51,9 @@ def mock_google_client(mocker, mock_google_responses):
     mock_client = mocker.AsyncMock()
     mock_client.__aenter__.return_value = mock_client
 
-    # 토큰 응답 설정
     mock_client.post.return_value = _create_mock_response(
         mock_google_responses["token_response"],
     )
-    # 유저 정보 응답 설정
     mock_client.get.return_value = _create_mock_response(
         mock_google_responses["userinfo_response"],
     )
