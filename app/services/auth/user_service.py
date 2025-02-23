@@ -38,8 +38,6 @@ async def get_or_create_user(db: AsyncSession, user_info: dict) -> tuple[User, b
             nickname="",
         )
         db.add(user)
-        await db.commit()
-        await db.refresh(user)
         return user, True
 
     return user, user.nickname == ""

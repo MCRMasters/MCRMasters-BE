@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from urllib.parse import urlencode
 
 import httpx
@@ -71,6 +72,10 @@ class GoogleOAuthService:
                 session,
                 user_info.model_dump(),
             )
+
+            user.last_login = datetime.now(UTC)
+            await session.commit()
+            await session.refresh(user)
 
             access_token = create_access_token(data={"sub": user.email})
             refresh_token = create_refresh_token(data={"sub": user.email})
