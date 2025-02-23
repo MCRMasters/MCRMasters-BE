@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,9 +28,7 @@ async def google_login():
         "prompt": "consent",
     }
 
-    auth_url = f"{settings.GOOGLE_AUTH_URL}?" + "&".join(
-        f"{k}={v}" for k, v in params.items()
-    )
+    auth_url = f"{settings.GOOGLE_AUTH_URL}?{urlencode(params)}"
     return AuthUrlResponse(auth_url=auth_url)
 
 
