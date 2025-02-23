@@ -1,4 +1,3 @@
-import pytest
 from fastapi import status
 from httpx import AsyncClient, HTTPStatusError, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -90,7 +89,6 @@ async def test_google_callback_token_error(
     mock_httpx_post.assert_called_once()
 
 
-@pytest.mark.skip
 async def test_google_callback_userinfo_error(
     client: AsyncClient,
     mocker,
@@ -98,31 +96,31 @@ async def test_google_callback_userinfo_error(
     mock_google_responses: dict,
 ):
     """Google 사용자 정보 조회 실패 테스트"""
-    # 토큰 요청/응답을 위한 객체 생성
-    token_request = Request("POST", "https://oauth2.googleapis.com/token")
-    token_response = Response(
-        status_code=200,
-        json=mock_google_responses["token_response"],
-        request=token_request,
-    )
+    # 토큰 응답 모킹
+    mock_token_response = mocker.Mock()
+    mock_token_response.json.return_value = mock_google_responses["token_response"]
+    mock_token_response.raise_for_status.return_value = None
 
-    # 유저 정보 요청/응답을 위한 객체 생성
+    # 사용자 정보 요청 실패 응답 모킹
     userinfo_request = Request("GET", "https://www.googleapis.com/oauth2/v2/userinfo")
     userinfo_response = Response(400, request=userinfo_request)
 
-    # HTTP 클라이언트 모킹
-    mock_httpx_post = mocker.patch(
-        "httpx.AsyncClient.post",
-        return_value=token_response,
+    mock_http_error = HTTPStatusError(
+        "Failed to get user info",
+        request=userinfo_request,
+        response=userinfo_response,
     )
-    mock_httpx_get = mocker.patch(
-        "httpx.AsyncClient.get",
-        side_effect=HTTPStatusError(
-            "Failed to get user info",
-            request=userinfo_request,
-            response=userinfo_response,
-        ),
-    )
+
+    # httpx.AsyncClient의 context manager 모킹
+    mock_client = mocker.AsyncMock()
+    mock_client.post.return_value = mock_token_response
+    mock_client.get.side_effect = mock_http_error
+
+    async_client_context = mocker.AsyncMock()
+    async_client_context.__aenter__.return_value = mock_client
+    async_client_context.__aexit__.return_value = None
+
+    mocker.patch("httpx.AsyncClient", return_value=async_client_context)
 
     # 테스트 실행
     response = await client.get("/api/v1/auth/login/google/callback?code=test_code")
@@ -131,6 +129,6 @@ async def test_google_callback_userinfo_error(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Failed to get token from Google"
 
-    # get과 post 메서드가 호출되었는지 확인
-    mock_httpx_post.assert_called_once()
-    mock_httpx_get.assert_called_once()
+    # 메서드 호출 확인
+    mock_client.post.assert_called_once()
+    mock_client.get.assert_called_once()
