@@ -3,8 +3,7 @@ from typing import Any
 
 
 class DomainErrorCode(str, Enum):
-    INVALID_USERNAME = "INVALID_USERNAME"
-    INVALID_PASSWORD = "INVALID_PASSWORD"
+    INVALID_UID = "INVALID_UID"
 
 
 class MCRDomainError(Exception):
