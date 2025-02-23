@@ -1,4 +1,3 @@
-from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock
 
 import pytest
@@ -9,42 +8,60 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
 from app.main import app
+from app.models.user import User
 from app.schemas.google_oauth import GoogleTokenResponse, GoogleUserInfo
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
-    """테스트 환경 설정"""
     load_dotenv(".env.test", override=True)
     yield
     load_dotenv(".env", override=True)
 
 
-@pytest_asyncio.fixture
-async def mock_session() -> AsyncGenerator[AsyncSession, None]:
+@pytest.fixture
+def mock_user():
+    return User(
+        email="test@example.com",
+        uid="123456789",
+        nickname="",
+        last_login=None,
+    )
+
+
+@pytest.fixture
+def mock_session(mocker, mock_user):
     session = AsyncMock(spec=AsyncSession)
 
-    session.commit = AsyncMock()
-    session.rollback = AsyncMock()
-    session.close = AsyncMock()
+    mock_result = mocker.Mock()
+    mock_result.scalar_one_or_none.return_value = mock_user
+    session.execute = AsyncMock(return_value=mock_result)
 
-    session.__aenter__ = AsyncMock(return_value=session)
-    session.__aexit__ = AsyncMock(return_value=None)
-
-    yield session
+    return session
 
 
-@pytest_asyncio.fixture
-async def client(mock_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
-    app.dependency_overrides[get_session] = lambda: mock_session
+@pytest.fixture
+def mock_google_client(mocker, mock_google_responses):
+    def _create_mock_response(response_data):
+        mock_response = mocker.Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        return mock_response
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test",
-    ) as ac:
-        yield ac
+    mock_client = mocker.AsyncMock()
+    mock_client.__aenter__.return_value = mock_client
 
-    app.dependency_overrides.clear()
+    # 토큰 응답 설정
+    mock_client.post.return_value = _create_mock_response(
+        mock_google_responses["token_response"],
+    )
+    # 유저 정보 응답 설정
+    mock_client.get.return_value = _create_mock_response(
+        mock_google_responses["userinfo_response"],
+    )
+
+    mocker.patch("httpx.AsyncClient", return_value=mock_client)
+    yield mock_client
 
 
 @pytest.fixture
@@ -66,3 +83,14 @@ def mock_google_responses():
             locale="en",
         ).model_dump(),
     }
+
+
+@pytest_asyncio.fixture
+async def client(mock_session):
+    app.dependency_overrides[get_session] = lambda: mock_session
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+    ) as client:
+        yield client
+    app.dependency_overrides.clear()
