@@ -21,15 +21,12 @@ def setup_test_environment():
 
 @pytest_asyncio.fixture
 async def mock_session() -> AsyncGenerator[AsyncSession, None]:
-    """Mock DB 세션"""
     session = AsyncMock(spec=AsyncSession)
 
-    # 트랜잭션 관련 메서드 설정
     session.commit = AsyncMock()
     session.rollback = AsyncMock()
     session.close = AsyncMock()
 
-    # 컨텍스트 매니저 시뮬레이션
     session.__aenter__ = AsyncMock(return_value=session)
     session.__aexit__ = AsyncMock(return_value=None)
 
@@ -44,9 +41,6 @@ async def client(mock_session: AsyncSession) -> AsyncGenerator[AsyncClient, None
         transport=ASGITransport(app=app),
         base_url="http://test",
     ) as ac:
-        print("Client type:", type(ac))
-        print("Transport type:", type(ac._transport))
-        print("Base URL:", ac.base_url)
         yield ac
 
     app.dependency_overrides.clear()
@@ -54,7 +48,6 @@ async def client(mock_session: AsyncSession) -> AsyncGenerator[AsyncClient, None
 
 @pytest.fixture
 def mock_google_responses():
-    """Google API 응답을 위한 mock 데이터"""
     return {
         "token_response": {
             "access_token": "mock_access_token",

@@ -50,7 +50,6 @@ async def test_db_connection(test_db_session: AsyncSession):
     assert value == 1
 
 
-# 트랜잭션 롤백 테스트
 async def test_transaction_rollback(test_db_session: AsyncSession):
     await test_db_session.execute(
         text("CREATE TABLE IF NOT EXISTS test_table (id INT)"),

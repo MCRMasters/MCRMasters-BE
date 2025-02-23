@@ -38,7 +38,7 @@ async def test_google_callback_success(
     mocker.patch("httpx.AsyncClient", return_value=async_client_context)
 
     mock_result = mocker.Mock()
-    mock_result.scalar_one_or_none.return_value = None  # 새 사용자라 가정
+    mock_result.scalar_one_or_none.return_value = None
     mock_session.execute.return_value = mock_result
 
     response = await client.get("/api/v1/auth/login/google/callback?code=test_code")
