@@ -35,7 +35,6 @@ async def google_login():
 @router.get("/login/google/callback", response_model=TokenResponse)
 async def google_callback(code: str, session: AsyncSession = Depends(get_session)):
     try:
-        # Access 토큰 얻기
         token_data = {
             "client_id": settings.GOOGLE_CLIENT_ID,
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
@@ -52,7 +51,6 @@ async def google_callback(code: str, session: AsyncSession = Depends(get_session
             token_response.raise_for_status()
             token_info = token_response.json()
 
-            # 사용자 정보 조회
             headers = {"Authorization": f"Bearer {token_info['access_token']}"}
             user_response = await client.get(
                 settings.GOOGLE_USER_INFO_URL,
@@ -61,10 +59,8 @@ async def google_callback(code: str, session: AsyncSession = Depends(get_session
             user_response.raise_for_status()
             user_info = user_response.json()
 
-        # DB에서 사용자 조회 또는 생성
         user, is_new_user = await get_or_create_user(session, user_info)
 
-        # JWT 토큰 생성
         access_token = create_access_token(data={"sub": user.email})
         refresh_token = create_refresh_token(data={"sub": user.email})
 
