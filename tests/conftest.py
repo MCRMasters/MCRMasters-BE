@@ -1,73 +1,94 @@
+from unittest.mock import AsyncMock
+
 import pytest
 import pytest_asyncio
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
-from sqlmodel import SQLModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import get_test_settings
 from app.db.session import get_session
 from app.main import app
+from app.models.user import User
+from app.schemas.google_oauth import GoogleTokenResponse, GoogleUserInfo
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
-    """테스트 환경 설정"""
     load_dotenv(".env.test", override=True)
     yield
     load_dotenv(".env", override=True)
 
 
-@pytest_asyncio.fixture(scope="session")
-async def db_engine():
-    """테스트 DB 엔진 설정"""
-    test_settings = get_test_settings()
-    engine = create_async_engine(
-        test_settings.database_uri,
-        echo=False,
-        future=True,
-        poolclass=NullPool,
-        isolation_level="AUTOCOMMIT",  # autocommit 모드 사용
+@pytest.fixture
+def mock_user():
+    return User(
+        email="test@example.com",
+        uid="123456789",
+        nickname="",
+        last_login=None,
     )
 
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
-    yield engine
 
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.drop_all)
-    await engine.dispose()
+@pytest.fixture
+def mock_session(mocker, mock_user):
+    session = AsyncMock(spec=AsyncSession)
+
+    mock_result = mocker.Mock()
+    mock_result.scalar_one_or_none.return_value = mock_user
+    session.execute = AsyncMock(return_value=mock_result)
+
+    return session
+
+
+@pytest.fixture
+def mock_google_client(mocker, mock_google_responses):
+    def _create_mock_response(response_data):
+        mock_response = mocker.Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        return mock_response
+
+    mock_client = mocker.AsyncMock()
+    mock_client.__aenter__.return_value = mock_client
+
+    mock_client.post.return_value = _create_mock_response(
+        mock_google_responses["token_response"],
+    )
+    mock_client.get.return_value = _create_mock_response(
+        mock_google_responses["userinfo_response"],
+    )
+
+    mocker.patch("httpx.AsyncClient", return_value=mock_client)
+    yield mock_client
+
+
+@pytest.fixture
+def mock_google_responses():
+    return {
+        "token_response": GoogleTokenResponse(
+            access_token="mock_access_token",
+            refresh_token="mock_refresh_token",
+            id_token="mock_id_token",
+            expires_in=3600,
+            token_type="Bearer",
+            scope="openid email profile",
+        ).model_dump(),
+        "userinfo_response": GoogleUserInfo(
+            email="test@example.com",
+            name="Test User",
+            picture="https://example.com/picture.jpg",
+            verified_email=True,
+            locale="en",
+        ).model_dump(),
+    }
 
 
 @pytest_asyncio.fixture
-async def db_session(db_engine):
-    """테스트용 DB 세션"""
-    session_maker = async_sessionmaker(
-        bind=db_engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-        autoflush=False,
-    )
-
-    async with session_maker() as session:
-        try:
-            yield session
-        finally:
-            await session.rollback()
-            await session.close()
-
-
-@pytest_asyncio.fixture
-async def client(db_session: AsyncSession):
-    """테스트 클라이언트"""
-    app.dependency_overrides[get_session] = lambda: db_session
-
+async def client(mock_session):
+    app.dependency_overrides[get_session] = lambda: mock_session
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
-        timeout=30.0,
-    ) as ac:
-        yield ac
-
+    ) as client:
+        yield client
     app.dependency_overrides.clear()

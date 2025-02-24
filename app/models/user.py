@@ -1,20 +1,25 @@
 from datetime import datetime
 
+from pydantic import field_validator
 from sqlalchemy import Column, DateTime
 from sqlmodel import Field
 
-from app.core.security import verify_password
 from app.models.base_model import BaseModel
+from app.util.validators import validate_uid
 
 
 class User(BaseModel, table=True):  # type: ignore[call-arg]
-    username: str | None = Field(unique=True, default=None)
-    password_hash: str
+    uid: str = Field(index=True, unique=True)
+    nickname: str = Field(max_length=10)
     is_active: bool = Field(default=True)
     last_login: datetime | None = Field(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),
     )
 
-    def verify_password(self, plain_password: str) -> bool:
-        return verify_password(plain_password, self.password_hash)
+    email: str | None = Field(default=None)
+
+    @field_validator("uid")
+    @classmethod
+    def validate_uid(cls, v: str) -> str:
+        return validate_uid(v)

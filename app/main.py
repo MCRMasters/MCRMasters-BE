@@ -35,10 +35,6 @@ async def mcr_domain_error_handler(
     _request: Request,
     exc: MCRDomainError,
 ) -> JSONResponse:
-    """
-    MCRDomainError에 대한 전역 예외 처리 핸들러
-    유효성 검사 실패 시 422 Unprocessable Entity 반환
-    """
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={

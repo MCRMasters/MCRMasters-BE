@@ -11,14 +11,14 @@ python = "^3.12"
 uvicorn = "^0.34.0"
 sqlmodel = "^0.0.22"
 pydantic-settings = "^2.7.1"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 alembic = "^1.13.1"
 asyncpg = "^0.30.0"
 python-dotenv = "^1.0.1"
 pytest-dotenv = "^0.5.2"
-bcrypt = ">=4.0.0"
 fastapi = "^0.115.8"
-python-jose = {extras = ["cryptography"], version = "^3.4.0"}
+python-jose = "^3.4.0"
+google-auth = "^2.38.0"
+google-auth-oauthlib = "^1.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
@@ -28,6 +28,7 @@ pre-commit = "^4.1.0"
 httpx = "^0.28.1"
 pytest-asyncio = "^0.25.3"
 psycopg2-binary = "^2.9.10"
+pytest-mock = "^3.14.0"
 
 [tool.mypy]
 python_version = "3.12"
@@ -82,10 +83,13 @@ exclude = ["migrations/*"]
 [tool.ruff.lint.mccabe]
 max-complexity = 10
 
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*.py" = ["ARG001"]
+
 [tool.pytest.ini_options]
 env_files = [".env", ".env.test"]
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "session"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
